@@ -26,8 +26,7 @@ button:disabled { opacity:.35; cursor:not-allowed; }
 .secondary-button { background:transparent; color:#6f726d; font-size:13px; padding:8px 12px; }
 small { display:block; margin-top:14px; color:#9a9b96; }
 .device-row { display:flex; gap:20px; text-align:left; align-items:center; padding-bottom:28px; border-bottom:1px solid #e7e6e0; }
-.device-photo { width:130px; height:130px; border-radius:14px; background:#e9e8e2; display:grid; place-items:center; text-align:center; font-family:'Space Grotesk'; font-size:13px; font-weight:700; color:#74766f; flex:none; overflow:hidden; }
-.image-preview { object-fit:cover; display:block; }
+.device-photo { width:130px; height:130px; border-radius:14px; background:#e9e8e2; display:block; object-fit:cover; flex:none; overflow:hidden; }
 .device-row h3 { font-family:'Space Grotesk'; margin:12px 0 5px; font-size:24px; }
 .device-row p { margin:0; font-size:14px; }
 .pill { font-size:10px; letter-spacing:.1em; font-weight:700; color:#466451; background:#e9f0ea; padding:6px 9px; border-radius:20px; }
@@ -36,6 +35,12 @@ small { display:block; margin-top:14px; color:#9a9b96; }
 .question { font-size:13px; margin-bottom:0; }
 .goal-box input { width:100%; margin-top:10px; padding:14px 15px; border:1px solid #d9d8d1; border-radius:10px; outline:none; }
 .goal-box input:focus { border-color:#777a75; }
+.error { color:#9a3d31 !important; background:#fbefed; border-radius:10px; padding:10px 12px; text-align:left; font-size:13px; }
+.meta-row { display:flex; align-items:center; justify-content:space-between; margin-top:24px; }
+.safe, .warn { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.safe { color:#466451; }
+.warn { color:#9a5a31; }
+.manual { margin-top:20px; padding:12px; background:#f4f3ed; border-radius:10px; font-size:12px; text-align:left; }
 .principles { border-top:1px solid #deddd7; display:grid; grid-template-columns:repeat(4,1fr); max-width:1120px; margin:auto; }
 .principles div { padding:30px 24px; border-right:1px solid #deddd7; }
 .principles div:last-child { border-right:0; }
