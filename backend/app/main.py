@@ -47,6 +47,7 @@ MANUFACTURER_SOURCES = {
 
 class GuideResponse(BaseModel):
     appliance: str
+    brand: str | None = None
     model: str | None = None
     observation: str
     confidence: str
@@ -176,6 +177,7 @@ Analyze the uploaded photo.
 Return exactly this JSON shape:
 {{
   "appliance": "what the device appears to be",
+  "brand": "brand if clearly visible/readable, otherwise null",
   "model": "exact model if clearly readable, otherwise null",
   "observation": "one short sentence about what is visible",
   "confidence": "high|medium|low",
@@ -201,6 +203,7 @@ Return exactly this JSON shape:
             vision_result = parse_json_response(raw) or {}
 
             appliance = str(vision_result.get("appliance") or "Unknown device")
+            brand = vision_result.get("brand")
             model = vision_result.get("model")
             observation = str(
                 vision_result.get("observation")
@@ -211,6 +214,7 @@ Return exactly this JSON shape:
 
             brand_hint = " ".join(
                 [
+                    str(brand or ""),
                     goal,
                     appliance,
                     observation,
@@ -225,6 +229,7 @@ Return exactly this JSON shape:
                 grounding_prompt = f"""You are the final answer layer for TinkerSight.
 
 The photo analysis found:
+- Brand: {json.dumps(brand or "not verified")}
 - Appliance: {json.dumps(appliance)}
 - Model: {json.dumps(model or "not verified")}
 - Visible observation: {json.dumps(observation)}
@@ -251,6 +256,7 @@ Never give hazardous repair instructions.
 Return exactly:
 {{
   "appliance": "{appliance}",
+  "brand": {json.dumps(brand)},
   "model": {json.dumps(model)},
   "observation": "{observation}",
   "confidence": "{confidence}",
@@ -268,6 +274,7 @@ Return exactly:
                 if grounded:
                     return GuideResponse(
                         appliance=str(grounded.get("appliance") or appliance),
+                        brand=grounded.get("brand", brand),
                         model=grounded.get("model", model),
                         observation=str(grounded.get("observation") or observation),
                         confidence=str(grounded.get("confidence") or confidence),
@@ -285,6 +292,7 @@ Return exactly:
 
             return GuideResponse(
                 appliance=appliance,
+                brand=brand,
                 model=model,
                 observation=observation,
                 confidence=confidence,
@@ -310,6 +318,7 @@ Return exactly:
     except httpx.HTTPError as exc:
         return GuideResponse(
             appliance="I couldn't inspect the photo yet.",
+            brand=None,
             model=None,
             observation="The local vision model is not reachable.",
             confidence="low",
