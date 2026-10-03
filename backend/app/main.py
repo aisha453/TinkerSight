@@ -107,11 +107,21 @@ async def guide(image: UploadFile = File(...), goal: str = Form(...)):
             manual_note=f"Local AI connection error: {type(exc).__name__}: {exc}",
         )
 
-    raw = data.get("message", {}).get("content", "")
+    raw = data.get("message", {}).get("content", "").strip()
     try:
         result = json.loads(raw)
         return GuideResponse(**result)
     except (json.JSONDecodeError, TypeError, ValueError):
+        # Some local VLM responses wrap valid JSON in markdown fences
+        # or add a small amount of text around it. Extract the JSON object.
+        try:
+            start = raw.find("{")
+            end = raw.rfind("}")
+            if start != -1 and end > start:
+                result = json.loads(raw[start:end + 1])
+                return GuideResponse(**result)
+        except (json.JSONDecodeError, TypeError, ValueError):
+            pass
         return GuideResponse(
             appliance="Unknown device",
             model=None,
