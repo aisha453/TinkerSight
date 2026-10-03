@@ -1,5 +1,7 @@
 # TinkerSight
 
+> TinkerSight is designed for everyday devices and equipment — not just home appliances. Think phones, laptops, gaming setups, routers, monitors, printers, and control panels.
+
 > Everyday technical help, explained like a person standing beside you.
 
 TinkerSight is an open-source, vision-first household technical guide. It is designed to help people understand and operate everyday appliances and equipment without forcing them to decode technical manuals.
