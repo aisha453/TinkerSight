@@ -42,8 +42,7 @@ MANUFACTURER_SOURCES = {
             "keywords": ["window", "5-in-1", "remote", "turbo"],
         },
     ],
-}
-
+],
     "lg": [
         {
             "title": "LG India — How to Use the Basic Functions of the Air Conditioner Remote Control",
