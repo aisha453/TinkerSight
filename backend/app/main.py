@@ -27,14 +27,14 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3-vl:2b")
 MANUFACTURER_SOURCES = {
     "blue star": [
         {
-            "title": "Blue Star Y Series Inverter AC — official product documentation",
-            "url": "https://consumer.bluestarindia.com/products/inverter-split-ac-y-series-2-ton-3-star-2025-model",
-            "keywords": ["5-in-1", "convertible", "turbo", "cool"],
+            "title": "Blue Star V Series Inverter AC — official product documentation",
+            "url": "https://consumer.bluestarindia.com/products/inverter-ac-v-series-2-ton-3-star-2026-bee-label-1",
+            "keywords": ["turbo", "cool", "5-in-1", "convertible"],
         },
         {
-            "title": "Blue Star D Series Inverter AC — official product documentation",
-            "url": "https://consumer.bluestarindia.com/products/inverter-split-ac-d-series-2-ton-3-star",
-            "keywords": ["energy", "eco", "saver", "5-in-1", "convertible"],
+            "title": "Blue Star Z Smart Wi-Fi Series Inverter AC — official product documentation",
+            "url": "https://consumer.bluestarindia.com/products/star-smart-enabled-inverter-ac-z-series-1-5-ton-5-star",
+            "keywords": ["5-in-1", "convertible", "remote"],
         },
         {
             "title": "Blue Star L Series Window AC — official product documentation",
