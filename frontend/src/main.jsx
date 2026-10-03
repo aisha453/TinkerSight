@@ -116,7 +116,13 @@ function App() {
                 <span className="pill">{result ? 'AI ANALYSIS READY' : 'PHOTO RECEIVED'}</span>
                 <h3>{result?.appliance || 'Let’s figure it out.'}</h3>
                 <p>{result?.observation || 'Tell TinkerSight what you want to do.'}</p>
-                {result?.model && <small className="model-line">Model: {result.model}</small>}
+                {(result?.brand || result?.model) && (
+                  <small className="model-line">
+                    {result.brand && <>Brand: {result.brand}</>}
+                    {result.brand && result.model && ' · '}
+                    {result.model && <>Model: {result.model}</>}
+                  </small>
+                )}
               </div>
             </div>
 
