@@ -94,7 +94,7 @@ function App() {
         <p className="eyebrow">EVERYDAY TECHNICAL HELP</p>
         <h1>Show it. Tell us what you want.<br /><em>We'll guide you.</em></h1>
         <p className="subtitle">
-          Simple instructions for appliances and everyday equipment — grounded in the right manual, not technical jargon.
+          Simple instructions for appliances and everyday equipment — grounded in manufacturer documentation when verified.
         </p>
 
         {!started ? (
@@ -116,6 +116,7 @@ function App() {
                 <span className="pill">{result ? 'AI ANALYSIS READY' : 'PHOTO RECEIVED'}</span>
                 <h3>{result?.appliance || 'Let’s figure it out.'}</h3>
                 <p>{result?.observation || 'Tell TinkerSight what you want to do.'}</p>
+                {result?.model && <small className="model-line">Model: {result.model}</small>}
               </div>
             </div>
 
@@ -143,6 +144,15 @@ function App() {
                 <div className="step">{result.step}</div>
                 {result.question && <p className="question"><strong>One thing I need to know:</strong> {result.question}</p>}
                 <p className="manual">{result.manual_note}</p>
+                {result.source_url && (
+                  <div className="source">
+                    <span>GROUNDED IN</span>
+                    <a href={result.source_url} target="_blank" rel="noreferrer">
+                      {result.source_title || 'Official manufacturer documentation'}
+                    </a>
+                    {result.source_note && <small>{result.source_note}</small>}
+                  </div>
+                )}
               </div>
             )}
 
