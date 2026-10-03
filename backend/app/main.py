@@ -44,6 +44,31 @@ MANUFACTURER_SOURCES = {
     ],
 }
 
+    "lg": [
+        {
+            "title": "LG India — How to Use the Basic Functions of the Air Conditioner Remote Control",
+            "url": "https://www.lg.com/in/support/product-support/troubleshoot/help-library/cs-CT52006833-20153013082290/",
+            "keywords": ["remote", "mode", "fan", "temperature", "air conditioner"],
+        },
+        {
+            "title": "LG India — Air Conditioner product support and manuals",
+            "url": "https://www.lg.com/in/support/product-support",
+            "keywords": ["manual", "support", "model", "air conditioner"],
+        },
+    ],
+    "samsung": [
+        {
+            "title": "Samsung India — Air Conditioner Support",
+            "url": "https://www.samsung.com/in/support/category/home-appliances/air-conditioning/",
+            "keywords": ["remote", "how to use", "air conditioner", "support"],
+        },
+        {
+            "title": "Samsung India — Important features for split air conditioners",
+            "url": "https://www.samsung.com/in/support/home-appliances/important-features-for-split-air-conditioners/",
+            "keywords": ["5-in-1", "cooling", "remote", "mode"],
+        },
+    ],
+}
 
 class GuideResponse(BaseModel):
     appliance: str
@@ -95,6 +120,36 @@ def relevant_excerpt(text: str, goal: str, max_chars: int = 3500) -> str:
     return text[start:start + max_chars]
 
 
+def safety_gate(appliance: str, observation: str, goal: str) -> str | None:
+    """Hard-stop obvious hazardous intervention requests before model guidance."""
+    text = f"{appliance} {observation} {goal}".lower()
+    hazards = [
+        "exposed wire",
+        "exposed wiring",
+        "live wire",
+        "mains wire",
+        "electrical panel",
+        "open electrical panel",
+        "gas leak",
+        "gas line",
+        "gas pipe",
+        "burning smell",
+        "burning odor",
+        "smoke",
+        "sparks",
+        "spark",
+        "shock",
+        "electric shock",
+        "inside the appliance",
+        "open the appliance",
+        "internal repair",
+        "bypass a fuse",
+    ]
+    if any(term in text for term in hazards):
+        return "stop"
+    return None
+
+
 def source_supports_goal(source_text: str, goal: str) -> bool:
     """Detect a few explicit manufacturer claims before asking the local model to infer."""
     text = source_text.lower()
@@ -108,17 +163,29 @@ def source_supports_goal(source_text: str, goal: str) -> bool:
 
 def pick_source(brand_hint: str, goal: str):
     brand = brand_hint.lower()
-    if "blue star" not in brand and "bluestar" not in brand:
-        return None
-
     goal_lower = goal.lower()
-    sources = MANUFACTURER_SOURCES["blue star"]
 
-    if "energy" in goal_lower or "eco" in goal_lower or "save" in goal_lower:
-        return sources[1]
-    if "window" in goal_lower:
-        return sources[2]
-    return sources[0]
+    if "blue star" in brand or "bluestar" in brand:
+        sources = MANUFACTURER_SOURCES["blue star"]
+        if "energy" in goal_lower or "eco" in goal_lower or "save" in goal_lower:
+            return sources[1]
+        if "window" in goal_lower:
+            return sources[2]
+        return sources[0]
+
+    if "lg" in brand:
+        sources = MANUFACTURER_SOURCES["lg"]
+        if "manual" in goal_lower or "model" in goal_lower:
+            return sources[1]
+        return sources[0]
+
+    if "samsung" in brand:
+        sources = MANUFACTURER_SOURCES["samsung"]
+        if "5-in-1" in goal_lower or "convertible" in goal_lower:
+            return sources[1]
+        return sources[0]
+
+    return None
 
 
 async def retrieve_source(source: dict):
@@ -222,6 +289,25 @@ Return exactly this JSON shape:
             )
             confidence = str(vision_result.get("confidence") or "low")
             safety = str(vision_result.get("safety") or "caution")
+            gated_safety = safety_gate(appliance, observation, goal)
+            if gated_safety:
+                safety = gated_safety
+
+            if safety == "stop":
+                return GuideResponse(
+                    appliance=appliance,
+                    brand=brand,
+                    model=model,
+                    observation=observation,
+                    confidence=confidence,
+                    step="Stop here. Follow the official safety procedure or contact a qualified technician.",
+                    question="Can you provide a photo of the normal external controls instead?",
+                    safety="stop",
+                    manual_note="TinkerSight did not provide hazardous repair instructions.",
+                    source_title=None,
+                    source_url=None,
+                    source_note=None,
+                )
 
             brand_hint = " ".join(
                 [
