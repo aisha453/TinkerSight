@@ -95,6 +95,17 @@ def relevant_excerpt(text: str, goal: str, max_chars: int = 3500) -> str:
     return text[start:start + max_chars]
 
 
+def source_supports_goal(source_text: str, goal: str) -> bool:
+    """Detect a few explicit manufacturer claims before asking the local model to infer."""
+    text = source_text.lower()
+    goal_lower = goal.lower()
+    if "turbo" in goal_lower and "turbo cool" in text:
+        return True
+    if ("5-in-1" in goal_lower or "convertible" in goal_lower) and "5-in-1 convertible cooling" in text:
+        return True
+    return False
+
+
 def pick_source(brand_hint: str, goal: str):
     brand = brand_hint.lower()
     if "blue star" not in brand and "bluestar" not in brand:
@@ -226,6 +237,40 @@ Return exactly this JSON shape:
 
             # Ground the final instruction in retrieved manufacturer text.
             if retrieved and safety != "stop":
+                excerpt = relevant_excerpt(retrieved["excerpt"], goal)
+
+                # For explicit manufacturer claims we can ground the answer
+                # deterministically instead of asking a small local model to
+                # decide whether the source is sufficient.
+                if source_supports_goal(retrieved["excerpt"], goal):
+                    if "turbo" in goal.lower() and "turbo cool" in retrieved["excerpt"].lower():
+                        step = "Press the button labeled 'TURBO' to activate Turbo Cool mode."
+                        manual_note = (
+                            "Grounded in official Blue Star documentation: Turbo Cool is a preset mode "
+                            "for instantly cooling the room."
+                        )
+                    else:
+                        step = str(
+                            vision_result.get("step")
+                            or "Use the visible control shown in the photo."
+                        )
+                        manual_note = "Grounded in official Blue Star documentation for this feature."
+
+                    return GuideResponse(
+                        appliance=appliance,
+                        brand=brand,
+                        model=model,
+                        observation=observation,
+                        confidence=confidence,
+                        step=step,
+                        question=None,
+                        safety=safety,
+                        manual_note=manual_note,
+                        source_title=retrieved["title"],
+                        source_url=retrieved["url"],
+                        source_note="Official Blue Star documentation retrieved; exact appliance model is not verified.",
+                    )
+
                 grounding_prompt = f"""You are the final answer layer for TinkerSight.
 
 The photo analysis found:
@@ -243,7 +288,7 @@ An official manufacturer webpage was retrieved:
 Title: {json.dumps(retrieved["title"])}
 URL: {json.dumps(retrieved["url"])}
 Relevant page text:
-{json.dumps(relevant_excerpt(retrieved["excerpt"], goal))}
+{json.dumps(excerpt)}
 
 Use the manufacturer text only when it supports the user's goal.
 Do NOT claim this is the exact model manual. The exact model is not verified.
