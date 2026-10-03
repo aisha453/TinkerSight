@@ -21,6 +21,28 @@ function App() {
     setError('')
   }
 
+  async function resizeImageForAI(sourceFile, maxDimension, quality) {
+    if (!sourceFile.type.startsWith('image/')) return sourceFile
+
+    const bitmap = await createImageBitmap(sourceFile)
+    const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height))
+    const width = Math.max(1, Math.round(bitmap.width * scale))
+    const height = Math.max(1, Math.round(bitmap.height * scale))
+
+    if (scale === 1 && sourceFile.type === 'image/jpeg') return sourceFile
+
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height)
+
+    const blob = await new Promise((resolve) =>
+      canvas.toBlob(resolve, 'image/jpeg', quality)
+    )
+
+    return blob || sourceFile
+  }
+
   async function analyze() {
     if (!file || !goal.trim()) return
 
@@ -28,11 +50,15 @@ function App() {
     setError('')
     setResult(null)
 
-    const form = new FormData()
-    form.append('image', file)
-    form.append('goal', goal)
-
     try {
+      // Keep the original photo for the UI, but send a smaller copy to the
+      // local vision model so image inference has less data to process.
+      const optimizedImage = await resizeImageForAI(file, 1280, 0.82)
+
+      const form = new FormData()
+      form.append('image', optimizedImage, 'tinkersight-input.jpg')
+      form.append('goal', goal)
+
       const response = await fetch('http://localhost:8000/api/guide', {
         method: 'POST',
         body: form,
