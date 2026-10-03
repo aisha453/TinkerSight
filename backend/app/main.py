@@ -79,8 +79,19 @@ def extract_page_text(html: str) -> str:
     html = re.sub(r"(?is)<(script|style|noscript).*?>.*?</\1>", " ", html)
     text = re.sub(r"(?s)<[^>]+>", " ", html)
     text = unescape(text)
-    text = re.sub(r"\\s+", " ", text).strip()
+    text = re.sub(r"\s+", " ", text).strip()
     return text[:12000]
+
+
+def relevant_excerpt(text: str, goal: str, max_chars: int = 3500) -> str:
+    """Keep the grounding prompt small enough for a local model context."""
+    terms = [term.lower() for term in re.findall(r"[a-zA-Z0-9-]{3,}", goal)]
+    lower = text.lower()
+    hits = [lower.find(term) for term in terms if lower.find(term) >= 0]
+    if not hits:
+        return text[:max_chars]
+    start = max(0, min(hits) - 700)
+    return text[start:start + max_chars]
 
 
 def pick_source(brand_hint: str, goal: str):
@@ -214,20 +225,20 @@ Return exactly this JSON shape:
                 grounding_prompt = f"""You are the final answer layer for TinkerSight.
 
 The photo analysis found:
-- Appliance: {appliance}
-- Model: {model or "not verified"}
-- Visible observation: {observation}
-- Confidence: {confidence}
-- Safety state: {safety}
+- Appliance: {json.dumps(appliance)}
+- Model: {json.dumps(model or "not verified")}
+- Visible observation: {json.dumps(observation)}
+- Confidence: {json.dumps(confidence)}
+- Safety state: {json.dumps(safety)}
 
 User goal:
-{goal}
+{json.dumps(goal)}
 
 An official manufacturer webpage was retrieved:
-Title: {retrieved["title"]}
-URL: {retrieved["url"]}
-Page text:
-{retrieved["excerpt"]}
+Title: {json.dumps(retrieved["title"])}
+URL: {json.dumps(retrieved["url"])}
+Relevant page text:
+{json.dumps(relevant_excerpt(retrieved["excerpt"], goal))}
 
 Use the manufacturer text only when it supports the user's goal.
 Do NOT claim this is the exact model manual. The exact model is not verified.
@@ -256,7 +267,17 @@ Return exactly:
                 grounded = parse_json_response(grounded_raw)
                 if grounded:
                     return GuideResponse(
-                        **grounded,
+                        appliance=str(grounded.get("appliance") or appliance),
+                        model=grounded.get("model", model),
+                        observation=str(grounded.get("observation") or observation),
+                        confidence=str(grounded.get("confidence") or confidence),
+                        step=str(grounded.get("step") or "Use the visible control shown in the photo."),
+                        question=grounded.get("question"),
+                        safety=str(grounded.get("safety") or safety),
+                        manual_note=str(
+                            grounded.get("manual_note")
+                            or "Official manufacturer documentation retrieved; exact model not verified."
+                        ),
                         source_title=retrieved["title"],
                         source_url=retrieved["url"],
                         source_note="Official Blue Star documentation retrieved; exact appliance model is not verified.",
