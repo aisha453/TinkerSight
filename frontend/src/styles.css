@@ -48,3 +48,10 @@ small { display:block; margin-top:14px; color:#9a9b96; }
 .principles span { font-family:'Space Grotesk'; font-weight:700; font-size:13px; }
 .principles p { color:#777a75; font-size:13px; line-height:1.5; }
 @media(max-width:700px){ .principles{grid-template-columns:1fr 1fr}.principles div:nth-child(2){border-right:0}.principles div:nth-child(3),.principles div:nth-child(4){border-top:1px solid #deddd7}.hero{padding-top:55px}.capture,.guide-card{padding:28px}.device-row{align-items:flex-start}.device-photo{width:90px;height:90px;flex:none}.step{font-size:24px} }
+
+.model-line { margin-top:8px; }
+.source { margin-top:12px; padding:14px; background:#eef3ee; border-radius:10px; text-align:left; }
+.source span { display:block; font-size:10px; letter-spacing:.1em; font-weight:700; color:#687568; margin-bottom:5px; }
+.source a { color:#304b39; font-size:13px; font-weight:600; text-decoration:none; }
+.source a:hover { text-decoration:underline; }
+.source small { margin-top:6px; color:#6f756f; line-height:1.45; }
