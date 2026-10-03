@@ -146,7 +146,7 @@ function App() {
                   <span className="pill">{result.confidence} confidence</span>
                   <span className={result.safety === 'normal' ? 'safe' : 'warn'}>{result.safety}</span>
                 </div>
-                <div className="step-label">NEXT STEP</div>
+                <div className="step-label">{result.response_type === 'information' ? 'WHAT I CAN SEE' : 'NEXT STEP'}</div>
                 <div className="step">{result.step}</div>
                 {result.question && <p className="question"><strong>One thing I need to know:</strong> {result.question}</p>}
                 <p className="manual">{result.manual_note}</p>
