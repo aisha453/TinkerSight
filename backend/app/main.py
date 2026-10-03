@@ -90,6 +90,7 @@ Rules:
 - Describe only what is actually visible.
 - Do not invent a model number. If it is not readable, return null.
 - Do not claim an official manual was checked unless source text is supplied.
+- Treat phones, laptops, gaming equipment, routers, monitors, printers, and accessories as valid everyday devices too.
 - Give short, concrete, layman-friendly guidance.
 - Prefer visible descriptions such as "green button" or "second button from the left" over technical names when useful.
 - If the image is unclear, say what needs to be photographed again.
