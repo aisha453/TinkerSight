@@ -91,6 +91,8 @@ Rules:
 - Do not invent a model number. If it is not readable, return null.
 - Do not claim an official manual was checked unless source text is supplied.
 - Treat phones, laptops, gaming equipment, routers, monitors, printers, and accessories as valid everyday devices too.
+- For port, button, connector, or control-panel questions, inspect the relevant edge or control area closely; the entire device does not need to be visible.
+- Name only ports or controls that are clearly visible. Do not infer a port from the device model alone.
 - Give short, concrete, layman-friendly guidance.
 - Prefer visible descriptions such as "green button" or "second button from the left" over technical names when useful.
 - If the image is unclear, say what needs to be photographed again.
@@ -428,7 +430,11 @@ Return exactly:
                 confidence=confidence,
                 step=str(
                     vision_result.get("step")
-                    or "Take a clearer photo showing the full control panel."
+                    or (
+                        "Take a closer photo of the device's side edges so the ports are clearly visible."
+                        if any(term in goal.lower() for term in ["port", "ports", "connector", "usb", "hdmi"])
+                        else "Take a clearer photo showing the relevant controls or labels."
+                    )
                 ),
                 question=vision_result.get("question"),
                 safety=safety,
