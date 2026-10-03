@@ -355,7 +355,7 @@ Return exactly this JSON shape:
                         manual_note=manual_note,
                         source_title=retrieved["title"],
                         source_url=retrieved["url"],
-                        source_note="Official Blue Star documentation retrieved; exact appliance model is not verified.",
+                        source_note="Official manufacturer documentation retrieved; exact appliance model is not verified.",
                     )
 
                 grounding_prompt = f"""You are the final answer layer for TinkerSight.
@@ -419,7 +419,7 @@ Return exactly:
                         ),
                         source_title=retrieved["title"],
                         source_url=retrieved["url"],
-                        source_note="Official Blue Star documentation retrieved; exact appliance model is not verified.",
+                        source_note="Official manufacturer documentation retrieved; exact appliance model is not verified.",
                     )
 
             return GuideResponse(
