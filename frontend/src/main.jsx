@@ -101,7 +101,7 @@ function App() {
           <div className="capture">
             <div className="capture-icon">＋</div>
             <h2>Show TinkerSight your device</h2>
-            <p>Upload a photo of the appliance or control panel.</p>
+            <p>Upload a photo of the device, appliance, control panel, or setup.</p>
             <label className="upload-button">
               Upload a photo
               <input type="file" accept="image/*" onChange={handleImage} />
