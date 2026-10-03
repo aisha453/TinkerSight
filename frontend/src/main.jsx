@@ -94,7 +94,7 @@ function App() {
         <p className="eyebrow">EVERYDAY TECHNICAL HELP</p>
         <h1>Show it. Tell us what you want.<br /><em>We'll guide you.</em></h1>
         <p className="subtitle">
-          Simple instructions for appliances and everyday equipment — grounded in manufacturer documentation when verified.
+          Simple guidance for devices, appliances, and everyday equipment — grounded in manufacturer documentation when verified.
         </p>
 
         {!started ? (
@@ -132,7 +132,7 @@ function App() {
                 <input
                   value={goal}
                   onChange={(event) => setGoal(event.target.value)}
-                  placeholder="e.g. Set the washing machine to 60°C"
+                  placeholder="e.g. How do I connect this to Wi-Fi?"
                   onKeyDown={(event) => event.key === 'Enter' && analyze()}
                 />
                 <button disabled={!goal.trim() || loading} onClick={analyze}>
