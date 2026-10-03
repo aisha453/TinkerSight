@@ -75,6 +75,7 @@ class GuideResponse(BaseModel):
     observation: str
     confidence: str
     step: str
+    response_type: str = "action"
     question: str | None = None
     safety: str
     manual_note: str
@@ -260,7 +261,8 @@ Return exactly this JSON shape:
   "model": "exact model if clearly readable, otherwise null",
   "observation": "one short sentence about what is visible",
   "confidence": "high|medium|low",
-  "step": "the safest useful next action in simple language",
+  "step": "the safest useful next action in simple language, or the concise answer when the user is only asking for information",
+  "response_type": "action|information",
   "question": "one short question if information is missing, otherwise null",
   "safety": "normal|caution|stop",
   "manual_note": "Vision-only result; manufacturer source has not yet been retrieved"
@@ -290,6 +292,9 @@ Return exactly this JSON shape:
             )
             confidence = str(vision_result.get("confidence") or "low")
             safety = str(vision_result.get("safety") or "caution")
+            response_type = str(vision_result.get("response_type") or "action").lower()
+            if response_type not in {"action", "information"}:
+                response_type = "action"
             gated_safety = safety_gate(appliance, observation, goal)
             if gated_safety:
                 safety = gated_safety
@@ -302,6 +307,7 @@ Return exactly this JSON shape:
                     observation=observation,
                     confidence=confidence,
                     step="Stop here. Follow the official safety procedure or contact a qualified technician.",
+                    response_type="action",
                     question="Can you provide a photo of the normal external controls instead?",
                     safety="stop",
                     manual_note="TinkerSight did not provide hazardous repair instructions.",
@@ -350,6 +356,7 @@ Return exactly this JSON shape:
                         observation=observation,
                         confidence=confidence,
                         step=step,
+                        response_type=response_type,
                         question=None,
                         safety=safety,
                         manual_note=manual_note,
@@ -392,7 +399,8 @@ Return exactly:
   "model": {json.dumps(model)},
   "observation": "{observation}",
   "confidence": "{confidence}",
-  "step": "one short grounded next action",
+  "step": "one short grounded next action, or a concise answer if the user only wants information",
+  "response_type": "action|information",
   "question": "one short question if the source/model is insufficient, otherwise null",
   "safety": "{safety}",
   "manual_note": "one short sentence explaining the grounding status"
@@ -411,6 +419,11 @@ Return exactly:
                         observation=str(grounded.get("observation") or observation),
                         confidence=str(grounded.get("confidence") or confidence),
                         step=str(grounded.get("step") or "Use the visible control shown in the photo."),
+                        response_type=(
+                            str(grounded.get("response_type") or response_type).lower()
+                            if str(grounded.get("response_type") or response_type).lower() in {"action", "information"}
+                            else response_type
+                        ),
                         question=grounded.get("question"),
                         safety=str(grounded.get("safety") or safety),
                         manual_note=str(
@@ -436,6 +449,7 @@ Return exactly:
                         else "Take a clearer photo showing the relevant controls or labels."
                     )
                 ),
+                response_type=response_type,
                 question=vision_result.get("question"),
                 safety=safety,
                 manual_note=(
