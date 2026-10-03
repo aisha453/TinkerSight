@@ -78,6 +78,7 @@ async def guide(image: UploadFile = File(...), goal: str = Form(...)):
     payload = {
         "model": OLLAMA_MODEL,
         "stream": False,
+        "think": False,
         "format": "json",
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -90,7 +91,7 @@ async def guide(image: UploadFile = File(...), goal: str = Form(...)):
     }
 
     try:
-        async with httpx.AsyncClient(timeout=120) as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(300.0, connect=10.0)) as client:
             response = await client.post(f"{OLLAMA_URL}/api/chat", json=payload)
             response.raise_for_status()
             data = response.json()
@@ -103,7 +104,7 @@ async def guide(image: UploadFile = File(...), goal: str = Form(...)):
             step="Start Ollama and make sure the TinkerSight vision model is installed.",
             question=None,
             safety="caution",
-            manual_note=f"Local AI connection error: {exc}",
+            manual_note=f"Local AI connection error: {type(exc).__name__}: {exc}",
         )
 
     raw = data.get("message", {}).get("content", "")
